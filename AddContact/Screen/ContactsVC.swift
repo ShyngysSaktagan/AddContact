@@ -8,20 +8,76 @@
 
 import UIKit
 
-class ContactsVC: UIViewController {
+class ContactsVC: UIViewController, CreatContactControllerDelegate {
     
     var contacts = [Contact]()
     
     var tableView = UITableView()
+    
+    func didAdd(contact: Contact) {
+        contacts.append(contact)
+        let newIndexPath = IndexPath(row: contacts.count-1, section: 0)
+        tableView.insertRows(at: [newIndexPath], with: .automatic)
+    }
+    
+    
+    func didEdit(contact: Contact) {
+        let row             = contacts.firstIndex(of: contact)
+        let reloadIndexPath = IndexPath(row: row!, section: 0)
+        tableView.reloadRows(at: [reloadIndexPath], with: .middle)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Contacts"
-        
+        self.contacts = CoreDataManager.shared.fetchCompanies()
+        configureView()
         configureTableView()
         addPlusButton()
+    }
+    
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+           let delete = UIContextualAction(style: .normal, title: "Delete") {  (action, view, completion) in
+               let context = CoreDataManager.shared.persistentContainer.viewContext
+               let company = self.contacts[indexPath.row]
+               
+               self.contacts.remove(at: indexPath.row)
+               tableView.deleteRows(at: [indexPath], with: .automatic)
+               context.delete(company)
+               
+               do {
+                   try context.save()
+                   completion(true)
+               } catch let error {
+                   print("Error \(error)")
+               }
+           }
+           
+           let edit = UIContextualAction(style: .normal, title: "Edit") { (action, view, completion) in
+               let creatCompanyController                  = CreatContactVC()
+               let navigationController                    = UINavigationController(rootViewController: creatCompanyController)
+               creatCompanyController.delegate             = self
+               creatCompanyController.contact              = self.contacts[indexPath.row]
+               navigationController.modalPresentationStyle = .fullScreen
+               self.present(navigationController, animated: true)
+           }
+           
+           edit.backgroundColor    = .systemGray3
+           edit.image              = UIImage(systemName: "slider.horizontal.3")
+           
+            delete.backgroundColor  = .red
+           delete.image            = UIImage(systemName: "trash")
+           
+           let swipeActions        = UISwipeActionsConfiguration(actions: [delete, edit])
+           return swipeActions
+       }
+    
+    
+    func configureView() {
+        title = "Contacts"
         view.backgroundColor = .white
     }
+    
     
     func configureTableView() {
         view.addSubview(tableView)

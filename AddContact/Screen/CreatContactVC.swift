@@ -72,7 +72,7 @@ class CreatContactVC: UIViewController {
         let contact = NSEntityDescription.insertNewObject(forEntityName: "Contact", into: context)
         
         contact.setValue(nameTextField.text, forKey: "name")
-        contact.setValue(numberTextField, forKey: "number")
+        contact.setValue(numberTextField.text, forKey: "number")
             
         do  {
             try context.save()
