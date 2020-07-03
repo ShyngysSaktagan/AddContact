@@ -36,7 +36,8 @@ class CreatContactVC: UIViewController, UINavigationControllerDelegate {
     
     var nameTextField : UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Enter contact name"
+        textField.placeholder = "Erzhan"
+        textField.autocorrectionType = .no
         textField.translatesAutoresizingMaskIntoConstraints = false
 
         return textField
@@ -51,7 +52,8 @@ class CreatContactVC: UIViewController, UINavigationControllerDelegate {
     
     var numberTextField : UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Enter contact number"
+        textField.placeholder = "+7-777-777-77-77"
+        textField.autocorrectionType = .no
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
         
@@ -77,7 +79,7 @@ class CreatContactVC: UIViewController, UINavigationControllerDelegate {
     
     override func viewDidLoad() {
         view.backgroundColor = .white
-        navigationController?.navigationBar.tintColor = .red
+        navigationController?.navigationBar.tintColor = .black
         configureNavigationBarItems()
         setupUI()
     }
@@ -115,11 +117,23 @@ class CreatContactVC: UIViewController, UINavigationControllerDelegate {
         do  {
             try context.save()
             dismiss(animated: true) {
-                self.delegate?.didAdd(contact: contact as! Contact)
+                self.didAddCompany(contact: contact as! Contact)
             }
+                
+            
         } catch let saveErr {
             print("\(saveErr)")
         }
+    }
+    
+    
+    func didEditCompany(contact: Contact) {
+        delegate?.didEdit(contact: contact)
+    }
+    
+    
+    func didAddCompany(contact: Contact) {
+        delegate?.didAdd(contact: contact)
     }
        
        
@@ -139,7 +153,7 @@ class CreatContactVC: UIViewController, UINavigationControllerDelegate {
         do {
             try context.save()
             dismiss(animated: true) {
-                self.delegate?.didEdit(contact: self.contact!)
+                self.didEditCompany(contact: self.contact!)
             }
         } catch let saveErr {
             print("Failed to save company:", saveErr)
@@ -235,7 +249,7 @@ extension CreatContactVC: UIImagePickerControllerDelegate {
     private func setupCircularImageStyle() {
         companyImageView.layer.cornerRadius = companyImageView.frame.width / 2
         companyImageView.clipsToBounds      = true
-        companyImageView.layer.borderColor  = UIColor.red.cgColor
+        companyImageView.layer.borderColor  = UIColor.black.cgColor
         companyImageView.layer.borderWidth  = 2
     }
 }

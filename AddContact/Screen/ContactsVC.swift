@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ContactsVC: UIViewController, CreatContactControllerDelegate {
+class ContactsVC: UIViewController, CreatContactControllerDelegate, UINavigationControllerDelegate {
     
     var contacts = [Contact]()
     
@@ -18,6 +18,17 @@ class ContactsVC: UIViewController, CreatContactControllerDelegate {
         contacts.append(contact)
         let newIndexPath = IndexPath(row: contacts.count-1, section: 0)
         tableView.insertRows(at: [newIndexPath], with: .automatic)
+        tableView.reloadData()
+        
+//        var indexPathToReload = [IndexPath]()
+//
+//        for index in contacts.indices {
+//            let indexPath = IndexPath(row: index, section: 0)
+//            indexPathToReload.append(indexPath)
+//        }
+//        tableView.reloadRows(at: indexPathToReload, with: .right)
+
+        
     }
     
     
@@ -66,7 +77,7 @@ class ContactsVC: UIViewController, CreatContactControllerDelegate {
         edit.backgroundColor    = .systemGray3
         edit.image              = UIImage(systemName: "slider.horizontal.3")
         
-        delete.backgroundColor  = .red
+        delete.backgroundColor  = .black
         delete.image            = UIImage(systemName: "trash")
         
         let swipeActions        = UISwipeActionsConfiguration(actions: [delete, edit])
@@ -76,7 +87,7 @@ class ContactsVC: UIViewController, CreatContactControllerDelegate {
     
     func configureView() {
         navigationController?.navigationBar.prefersLargeTitles = true
-        navigationController?.navigationBar.tintColor = .red
+        navigationController?.navigationBar.tintColor = .black
         title = "Contacts"
         view.backgroundColor = .white
     }
@@ -89,7 +100,7 @@ class ContactsVC: UIViewController, CreatContactControllerDelegate {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = .white
         setTableViewDelegates()
-        tableView.rowHeight = 50
+        tableView.rowHeight = 60
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -113,6 +124,7 @@ class ContactsVC: UIViewController, CreatContactControllerDelegate {
     
     @objc func addContact() {
         let creatContact = UINavigationController(rootViewController: CreatContactVC())
+        creatContact.delegate = self
         present(creatContact, animated: true)
     }
     

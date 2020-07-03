@@ -28,7 +28,7 @@ class ContantsCellTableViewCell: UITableViewCell {
         image.contentMode        = .scaleAspectFill
         image.clipsToBounds      = true
         image.layer.cornerRadius = 20
-        image.layer.borderColor  = UIColor.red.cgColor
+        image.layer.borderColor  = UIColor.black.cgColor
         image.layer.borderWidth  = 1
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
