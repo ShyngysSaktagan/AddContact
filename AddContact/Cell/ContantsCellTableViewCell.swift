@@ -13,12 +13,44 @@ class ContantsCellTableViewCell: UITableViewCell {
     var contact : Contact?  {
         didSet {
             contactName.text = contact?.name
+            
+            if let imageData = contact?.imageData {
+                companyImageView.image = UIImage(data: imageData)
+            }
+                       
+            
             contactNumber.text = contact?.number
         }
     }
     
+    let companyImageView : UIImageView = {
+        let image = UIImageView(image: UIImage(named: "select_photo_empty"))
+        image.contentMode        = .scaleAspectFill
+        image.clipsToBounds      = true
+        image.layer.cornerRadius = 20
+        image.layer.borderColor  = UIColor.red.cgColor
+        image.layer.borderWidth  = 1
+        image.translatesAutoresizingMaskIntoConstraints = false
+        return image
+    } ()
+    
     var contactName = UILabel()
-    var contactNumber = UILabel()
+    
+    var contactNumber : UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont.boldSystemFont(ofSize: 8)
+        return label
+    } ()
+    
+    var stack : UIStackView = {
+        let stack = UIStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.alignment = .fill
+        stack.distribution = .equalSpacing
+        stack.axis = .vertical
+        return stack
+    } ()
     
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -34,6 +66,8 @@ class ContantsCellTableViewCell: UITableViewCell {
     
     
     func configureUI() {
+        backgroundColor = .systemGray5
+        
         contactNumber.text           = "Contact number"
         contactNumber.font           = UIFont.boldSystemFont(ofSize: 16)
         contactNumber.textColor      = .label
@@ -47,15 +81,20 @@ class ContantsCellTableViewCell: UITableViewCell {
     
     
     func setupUI() {
-        [contactName, contactNumber].forEach { addSubview($0) }
+        addSubview(stack)
+        stack.addArrangedSubview(contactName)
+        stack.addArrangedSubview(contactNumber)
+        [companyImageView, stack].forEach { addSubview($0) }
         
         NSLayoutConstraint.activate([
-            contactName.centerYAnchor.constraint(equalTo: centerYAnchor),
-            contactName.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            companyImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            companyImageView.heightAnchor.constraint(equalToConstant: 40),
+            companyImageView.widthAnchor.constraint(equalToConstant: 40),
+            companyImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
             
-            contactNumber.centerYAnchor.constraint(equalTo: centerYAnchor),
-            contactNumber.leadingAnchor.constraint(equalTo: contactName.trailingAnchor, constant: 10),
-            contactNumber.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20)
+            stack.leadingAnchor.constraint(equalTo: companyImageView.trailingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stack.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
     }
 }

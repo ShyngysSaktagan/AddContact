@@ -26,6 +26,7 @@ class ContactsVC: UIViewController, CreatContactControllerDelegate {
         let reloadIndexPath = IndexPath(row: row!, section: 0)
         tableView.reloadRows(at: [reloadIndexPath], with: .middle)
     }
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,43 +38,45 @@ class ContactsVC: UIViewController, CreatContactControllerDelegate {
     
     
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-           let delete = UIContextualAction(style: .normal, title: "Delete") {  (action, view, completion) in
-               let context = CoreDataManager.shared.persistentContainer.viewContext
-               let company = self.contacts[indexPath.row]
-               
-               self.contacts.remove(at: indexPath.row)
-               tableView.deleteRows(at: [indexPath], with: .automatic)
-               context.delete(company)
-               
-               do {
-                   try context.save()
-                   completion(true)
-               } catch let error {
-                   print("Error \(error)")
-               }
-           }
-           
-           let edit = UIContextualAction(style: .normal, title: "Edit") { (action, view, completion) in
-               let creatCompanyController                  = CreatContactVC()
-               let navigationController                    = UINavigationController(rootViewController: creatCompanyController)
-               creatCompanyController.delegate             = self
-               creatCompanyController.contact              = self.contacts[indexPath.row]
-               navigationController.modalPresentationStyle = .fullScreen
-               self.present(navigationController, animated: true)
-           }
-           
-           edit.backgroundColor    = .systemGray3
-           edit.image              = UIImage(systemName: "slider.horizontal.3")
-           
-            delete.backgroundColor  = .red
-           delete.image            = UIImage(systemName: "trash")
-           
-           let swipeActions        = UISwipeActionsConfiguration(actions: [delete, edit])
-           return swipeActions
-       }
+        let delete = UIContextualAction(style: .normal, title: "Delete") {  (action, view, completion) in
+            let context = CoreDataManager.shared.persistentContainer.viewContext
+            let company = self.contacts[indexPath.row]
+            
+            self.contacts.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+            context.delete(company)
+            
+            do {
+                try context.save()
+                completion(true)
+            } catch let error {
+                print("Error \(error)")
+            }
+        }
+        
+        let edit = UIContextualAction(style: .normal, title: "Edit") { (action, view, completion) in
+            let creatCompanyController                  = CreatContactVC()
+            let navigationController                    = UINavigationController(rootViewController: creatCompanyController)
+            creatCompanyController.delegate             = self
+            creatCompanyController.contact              = self.contacts[indexPath.row]
+            navigationController.modalPresentationStyle = .fullScreen
+            self.present(navigationController, animated: true)
+        }
+        
+        edit.backgroundColor    = .systemGray3
+        edit.image              = UIImage(systemName: "slider.horizontal.3")
+        
+        delete.backgroundColor  = .red
+        delete.image            = UIImage(systemName: "trash")
+        
+        let swipeActions        = UISwipeActionsConfiguration(actions: [delete, edit])
+        return swipeActions
+    }
     
     
     func configureView() {
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationController?.navigationBar.tintColor = .red
         title = "Contacts"
         view.backgroundColor = .white
     }
@@ -86,7 +89,7 @@ class ContactsVC: UIViewController, CreatContactControllerDelegate {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = .white
         setTableViewDelegates()
-        tableView.rowHeight = 80
+        tableView.rowHeight = 50
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -109,8 +112,8 @@ class ContactsVC: UIViewController, CreatContactControllerDelegate {
     
     
     @objc func addContact() {
-        let creatContact = CreatContactVC()
-        navigationController?.pushViewController(creatContact, animated: true)
+        let creatContact = UINavigationController(rootViewController: CreatContactVC())
+        present(creatContact, animated: true)
     }
     
 }

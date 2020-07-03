@@ -14,7 +14,18 @@ protocol CreatContactControllerDelegate {
     func didEdit(contact: Contact)
 }
 
-class CreatContactVC: UIViewController {
+class CreatContactVC: UIViewController, UINavigationControllerDelegate {
+    
+    lazy var companyImageView: UIImageView = {
+        let imageView = UIImageView(image: #imageLiteral(resourceName: "select_photo_empty"))
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFill
+        imageView.isUserInteractionEnabled = true
+        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleSelectPhoto)))
+        
+        return imageView
+    }()
+    
     
     var nameLabel : UILabel = {
         let label = UILabel()
@@ -51,12 +62,22 @@ class CreatContactVC: UIViewController {
     var contact : Contact? {
         didSet {
             nameTextField.text = contact?.name
-            numberTextField.text = contact?.number
+            guard let number = contact?.number else {
+                return
+            }
+            if let imageData = contact?.imageData {
+                companyImageView.image = UIImage(data: imageData)
+                setupCircularImageStyle()
+            }
+            numberTextField.text = number
+            
         }
     }
     
+    
     override func viewDidLoad() {
         view.backgroundColor = .white
+        navigationController?.navigationBar.tintColor = .red
         configureNavigationBarItems()
         setupUI()
     }
@@ -64,6 +85,12 @@ class CreatContactVC: UIViewController {
     
     func configureNavigationBarItems() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(handleSave))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelView))
+    }
+    
+    
+    @objc func cancelView() {
+        dismiss(animated: true, completion: nil)
     }
     
     
@@ -72,7 +99,18 @@ class CreatContactVC: UIViewController {
         let contact = NSEntityDescription.insertNewObject(forEntityName: "Contact", into: context)
         
         contact.setValue(nameTextField.text, forKey: "name")
-        contact.setValue(numberTextField.text, forKey: "number")
+        
+        if numberTextField.text != "" {
+            contact.setValue(numberTextField.text, forKey: "number")
+        }else{
+            print("Need to enter number")
+            return
+        }
+    
+        if let companyImage = companyImageView.image {
+            let imageData = companyImage.jpegData(compressionQuality: 0.8)
+            contact.setValue(imageData, forKey: "imageData")
+        }
             
         do  {
             try context.save()
@@ -87,10 +125,16 @@ class CreatContactVC: UIViewController {
        
     func changeCompany(){
         let context = CoreDataManager.shared.persistentContainer.viewContext
-        
-        contact?.name           = nameTextField.text
-        contact?.number         = numberTextField.text
 
+        contact?.name           = nameTextField.text
+        guard let number = numberTextField.text else {
+            return
+        }
+        contact?.number         = number
+        
+        if let imageData = companyImageView.image {
+            contact?.imageData  = imageData.jpegData(compressionQuality: 0.8)
+        }
         
         do {
             try context.save()
@@ -109,15 +153,22 @@ class CreatContactVC: UIViewController {
         }else {
             changeCompany()
         }
+        dismiss(animated: true, completion: nil)
+
     }
     
     
     func setupUI() {
-        [nameLabel, nameTextField, numberLabel, numberTextField].forEach{ view.addSubview($0) }
+        
+        [companyImageView, nameLabel, nameTextField, numberLabel, numberTextField].forEach{ view.addSubview($0) }
         
         NSLayoutConstraint.activate([
-            
-            nameLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            companyImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            companyImageView.widthAnchor.constraint(equalToConstant: 100),
+            companyImageView.heightAnchor.constraint(equalToConstant: 100),
+            companyImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+        
+            nameLabel.topAnchor.constraint(equalTo: companyImageView.bottomAnchor, constant: 8),
             nameLabel.widthAnchor.constraint(equalToConstant: 100),
             nameLabel.heightAnchor.constraint(equalToConstant: 50),
             nameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -138,5 +189,53 @@ class CreatContactVC: UIViewController {
             numberTextField.leadingAnchor.constraint(equalTo: numberLabel.trailingAnchor, constant: 8),
             numberTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
+    }
+}
+
+
+extension CreatContactVC: UIImagePickerControllerDelegate {
+    @objc func handleSelectPhoto() {
+        let imagePickerController                       = UIImagePickerController()
+        imagePickerController.delegate                  = self
+        imagePickerController.allowsEditing             = true
+        imagePickerController.modalPresentationStyle    = .fullScreen
+        present(imagePickerController, animated: true, completion: nil)
+    }
+    
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
+        
+        if let editedImage = info[convertFromUIImagePickerControllerInfoKey(UIImagePickerController.InfoKey.editedImage)] as? UIImage {
+            companyImageView.image = editedImage
+        } else if let originalImage = info[convertFromUIImagePickerControllerInfoKey(UIImagePickerController.InfoKey.originalImage)] as? UIImage {
+            companyImageView.image = originalImage
+        }
+        
+        setupCircularImageStyle()
+        dismiss(animated: true, completion: nil)
+    }
+    
+    // Helper function inserted by Swift 4.2 migrator.
+    fileprivate func convertFromUIImagePickerControllerInfoKeyDictionary(_ input: [UIImagePickerController.InfoKey: Any]) -> [String: Any] {
+        return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+    }
+
+    // Helper function inserted by Swift 4.2 migrator.
+    fileprivate func convertFromUIImagePickerControllerInfoKey(_ input: UIImagePickerController.InfoKey) -> String {
+        return input.rawValue
+    }
+    
+    
+    private func setupCircularImageStyle() {
+        companyImageView.layer.cornerRadius = companyImageView.frame.width / 2
+        companyImageView.clipsToBounds      = true
+        companyImageView.layer.borderColor  = UIColor.red.cgColor
+        companyImageView.layer.borderWidth  = 2
     }
 }
