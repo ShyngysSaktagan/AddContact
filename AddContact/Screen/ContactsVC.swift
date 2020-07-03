@@ -123,7 +123,9 @@ class ContactsVC: UIViewController, CreatContactControllerDelegate, UINavigation
     
     
     @objc func addContact() {
-        let creatContact = UINavigationController(rootViewController: CreatContactVC())
+        let page = CreatContactVC()
+        page.delegate = self
+        let creatContact = UINavigationController(rootViewController: page)
         creatContact.delegate = self
         present(creatContact, animated: true)
     }
