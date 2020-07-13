@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SnapKit
 
 class ContantsCellTableViewCell: UITableViewCell {
     
@@ -86,15 +87,26 @@ class ContantsCellTableViewCell: UITableViewCell {
         stack.addArrangedSubview(contactNumber)
         [companyImageView, stack].forEach { addSubview($0) }
         
-        NSLayoutConstraint.activate([
-            companyImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            companyImageView.heightAnchor.constraint(equalToConstant: 40),
-            companyImageView.widthAnchor.constraint(equalToConstant: 40),
-            companyImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            
-            stack.leadingAnchor.constraint(equalTo: companyImageView.trailingAnchor, constant: 16),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.centerYAnchor.constraint(equalTo: centerYAnchor),
-        ])
+        companyImageView.snp.makeConstraints { make in
+            make.height.width.equalTo(40)
+            make.leading.equalToSuperview().offset(16)
+            make.centerY.equalToSuperview()
+        }
+        
+        stack.snp.makeConstraints { make in
+            make.trailing.centerY.equalToSuperview()
+            make.leading.equalTo(companyImageView.snp.trailing).offset(16)
+        }
+//        
+//        NSLayoutConstraint.activate([
+//            companyImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+//            companyImageView.heightAnchor.constraint(equalToConstant: 40),
+//            companyImageView.widthAnchor.constraint(equalToConstant: 40),
+//            companyImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+//            
+//            stack.leadingAnchor.constraint(equalTo: companyImageView.trailingAnchor, constant: 16),
+//            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
+//            stack.centerYAnchor.constraint(equalTo: centerYAnchor),
+//        ])
     }
 }
